@@ -18,16 +18,108 @@ To solve this, we adopt conformal prediction techniques, and in particular, we p
 - **Max Rank**: A faster alternative that uses the maximum rank of residuals per individual to set interval widths.
 - **Fast Beta-Optim (Max Rank Beta-Optim)**: A hybrid method combining the optimization of Beta-Optim with the speed and stability of Max Rank.
 
-## About Conformal Prediction
-Conformal prediction is a statistical framework that allows us to construct prediction intervals that are valid 
-**regardless of the underlying model**. It only requires that the data be **exchangeable**, which is a weaker condition than being i.i.d.
+About Conformal Prediction
+Conformal Prediction is a flexible framework for generating valid prediction intervals that capture uncertainty, regardless of the underlying model or data distribution.
 
-It provides the guarantee:  
-P(Y_test ∈ C(X_test)) ≥ 1 − α  
-for some significance level (α). This means that the true target will lie inside the predicted interval at least (1 − α) of the time.
+It requires only one key assumption: exchangeability.
+
+📎 Exchangeability Assumption
+Assume that the calibration set
+(
+𝑋
+1
+,
+𝑌
+1
+)
+,
+…
+,
+(
+𝑋
+𝑛
+,
+𝑌
+𝑛
+)
+(X 
+1
+​
+ ,Y 
+1
+​
+ ),…,(X 
+n
+​
+ ,Y 
+n
+​
+ )
+and the test point
+(
+𝑋
+test
+,
+𝑌
+test
+)
+(X 
+test
+​
+ ,Y 
+test
+​
+ )
+are exchangeable.
+
+This means their joint distribution is invariant under permutation — a weaker assumption than the traditional i.i.d. setting.
+
+✅ Conformal Prediction Guarantee
+For any chosen confidence level $1 - \alpha$, conformal prediction guarantees:
+
+1
+−
+𝛼
+≤
+𝑃
+(
+𝑌
+test
+∈
+𝐶
+(
+𝑋
+test
+)
+)
+≤
+1
+−
+𝛼
++
+1
+𝑛
++
+1
+1−α≤P(Y 
+test
+​
+ ∈C(X 
+test
+​
+ ))≤1−α+ 
+n+1
+1
+​
+ 
+💡 Interpretation
+$\mathcal{C}(X_{\text{test}})$ is the prediction interval for a new test input.
+
+This interval contains the true target $Y_{\text{test}}$ with high probability.
+
+The guarantee is distribution-free — it holds under no specific probabilistic assumptions, as long as exchangeability is satisfied.
 
 
-![Conformal Prediction Illustration]
 
 ### Coverage Guarantee
 **Exchangeability Assumption:** Assume that the calibration set \((X_i, Y_i)\) and the test point \((X_{\text{test}}, Y_{\text{test}})\) are exchangeable.
