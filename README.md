@@ -22,11 +22,10 @@ To solve this, we adopt conformal prediction techniques, and in particular, we p
 Conformal prediction is a statistical framework that allows us to construct prediction intervals that are valid 
 **regardless of the underlying model**. It only requires that the data be **exchangeable**, which is a weaker condition than being i.i.d.
 
-It provides the guarantee:
-\[
-\mathbb{P}(Y_{\text{test}} \in \mathcal{C}(X_{\text{test}})) \geq 1 - \alpha
-\]
-for some significance level \( \alpha \). This means that the true target will lie inside the predicted interval at least \(1 - \alpha\) of the time.
+It provides the guarantee:  
+P(Y_test ∈ C(X_test)) ≥ 1 − α  
+for some significance level (α). This means that the true target will lie inside the predicted interval at least (1 − α) of the time.
+
 
 ![Conformal Prediction Illustration]
 
