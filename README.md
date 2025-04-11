@@ -1,123 +1,43 @@
 # Algorithmique: Uncertainty Quantification in Multi-Output Regression
 
-## Overview
-`Algorithmique` is an R package for building machine learning models and quantifying prediction uncertainty in multi-output regression problems using conformal prediction techniques. It provides multiple uncertainty estimation methods, including:
-- **Beta-Optim**
-- **Max Rank**
-- **Max Rank Beta-Optim** (Fast Beta-Optim)
 
-These methods enable you to construct **simultaneous prediction intervals** with valid statistical guarantees. The implementation also includes a comparison with a C++ version of the code to evaluate execution speed.
+This repository provides an R package implementing conformal prediction techniques to estimate simultaneous prediction intervals for multi-output regression tasks. The goal is to offer uncertainty-aware predictions with provable guarantees, even in high-dimensional settings.
 
-## Introduction & Motivation
-In many real-world applications such as healthcare or energy monitoring, we aim to predict entire curves or trajectories (e.g., heart rate over 24 hours). These are inherently multi-dimensional outputs. While machine learning models can provide accurate point predictions, they often lack a measure of confidence. 
+We include:
 
-This project addresses the challenge of providing reliable **prediction intervals** that account for **uncertainty across all dimensions** simultaneously. The goal is to guarantee that the entire output vector lies within the predicted intervals with high probability.
+Three uncertainty quantification methods (Beta-Optim, Max Rank, Fast Beta-Optim)
 
-To solve this, we adopt conformal prediction techniques, and in particular, we propose and analyze the performance of:
-- **Beta-Optim**: A method to calibrate intervals by optimizing the tolerance parameter \( \beta \) through dichotomic search.
-- **Max Rank**: A faster alternative that uses the maximum rank of residuals per individual to set interval widths.
-- **Fast Beta-Optim (Max Rank Beta-Optim)**: A hybrid method combining the optimization of Beta-Optim with the speed and stability of Max Rank.
+R + C++ implementations for comparison
 
-About Conformal Prediction
-Conformal Prediction is a flexible framework for generating valid prediction intervals that capture uncertainty, regardless of the underlying model or data distribution.
+A tutorial and benchmark results
 
-It requires only one key assumption: exchangeability.
+## Problem & Motivation
 
-📎 Exchangeability Assumption
-Assume that the calibration set
-(
-𝑋
-1
-,
-𝑌
-1
-)
-,
-…
-,
-(
-𝑋
-𝑛
-,
-𝑌
-𝑛
-)
-(X 
-1
-​
- ,Y 
-1
-​
- ),…,(X 
-n
-​
- ,Y 
-n
-​
- )
-and the test point
-(
-𝑋
-test
-,
-𝑌
-test
-)
-(X 
-test
-​
- ,Y 
-test
-​
- )
-are exchangeable.
+In many fields such as health monitoring, energy prediction, or financial forecasting, we aim to predict not just a single value, but an entire curve (e.g., heart rate over 24 hours).
 
-This means their joint distribution is invariant under permutation — a weaker assumption than the traditional i.i.d. setting.
+Yet, it's crucial to also answer:
 
-✅ Conformal Prediction Guarantee
-For any chosen confidence level $1 - \alpha$, conformal prediction guarantees:
+🛡"How confident am I in these predictions?"
 
-1
-−
-𝛼
-≤
-𝑃
-(
-𝑌
-test
-∈
-𝐶
-(
-𝑋
-test
-)
-)
-≤
-1
-−
-𝛼
-+
-1
-𝑛
-+
-1
-1−α≤P(Y 
-test
-​
- ∈C(X 
-test
-​
- ))≤1−α+ 
-n+1
-1
-​
- 
-💡 Interpretation
-$\mathcal{C}(X_{\text{test}})$ is the prediction interval for a new test input.
+We want to provide prediction intervals that cover all dimensions of $Y = (y_1, y_2, \dots, y_p)$ simultaneously, with a global probability $1 - \alpha$.
 
-This interval contains the true target $Y_{\text{test}}$ with high probability.
+To solve this, we use Conformal Prediction, and in particular, we propose:
 
-The guarantee is distribution-free — it holds under no specific probabilistic assumptions, as long as exchangeability is satisfied.
+Beta-Optim: a calibration-based method
+
+Fast Beta-Optim: a rank-based acceleration
+
+Max Rank: a simple, extremely fast baseline
+
+## About Conformal Prediction
+
+Conformal prediction is a statistical framework that allows us to construct prediction intervals that are valid **regardless of the underlying model**. It only requires that the data be **exchangeable**, which is a weaker condition than being i.i.d.
+
+It provides the guarantee:  
+P(Y_test ∈ C(X_test)) ≥ 1 − α  
+for some significance level (α). This means that the true target will lie inside the predicted interval at least (1 − α) of the time.
+
+![Conformal Prediction Illustration](figures/conformal_diagram.png)
 
 
 
@@ -188,11 +108,16 @@ uncertainty_model$fit()
 
 ## Implemented Methods
 - **Beta-Optim:**
+Binary search over $\beta$ to find the smallest value such that the simultaneous coverage is at least $1 - \alpha$.
   - This method searches for the smallest width of prediction intervals that ensures a target **simultaneous coverage**.
   - It uses **dichotomic optimization** on a parameter \( \beta \), which controls the tolerance of the intervals.
   - For each candidate \( \beta \), quantiles \( q_j(1-\beta) \) are computed per dimension, and coverage is evaluated.
+$p$-dimensional quantiles for each $\beta$.
   - The optimal \( \beta^* \) minimizes the deviation from the desired coverage \( 1 - \alpha \).
 
+
+
+🔹 Max Rank
 - **Max Rank:**
   - Ranks residuals for each dimension, and uses the **maximum rank per individual** as a summary statistic.
   - Prediction intervals are constructed using a single quantile position (\( r_{\text{max}} \)) across dimensions.
@@ -201,11 +126,17 @@ uncertainty_model$fit()
   - Combines the **rank-based speed** of Max Rank with the **coverage optimization** of Beta-Optim.
   - Instead of optimizing each dimension’s quantile separately, we optimize directly on the rank threshold.
   - This results in a much faster algorithm with similar coverage properties.
+ Fast Beta-Optim
+
+Uses the same idea as Max Rank, but optimizes the threshold using binary search on $\beta$.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
 
 ## Results
 - All three methods were tested on simulated datasets representing multivariate time series (e.g., biological or cardiac signals).
 - Empirical evaluations show that Max Rank Beta-Optim provides the best trade-off between computational efficiency and predictive reliability.
-- Comparisons with the C++ implementation demonstrate significant speed-ups in execution.
 
 ## Perspectives
 - Future work could involve extending the method to a vectorized beta, learning one \( \beta_j \) per output dimension.
