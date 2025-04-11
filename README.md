@@ -116,7 +116,7 @@ Binary search over $\beta$ to find the smallest value such that the simultaneous
 $p$-dimensional quantiles for each $\beta$.
   - The optimal \( \beta^* \) minimizes the deviation from the desired coverage \( 1 - \alpha \).
 
-simcov(beta) = (1/n) * sum_{i=1}^n  product_{j=1}^p  I{ y_ij ∈ [ŷ_ij ± q_j(1 - beta)] }
+simcov(β) = (1/n) * sum_{i=1}^n ∏_{j=1}^p 𝟙{ y_{i,j} ∈ [ŷ_{i,j} ± q_j(1 - β)] }
 
 
 🔹 Max Rank
@@ -130,7 +130,8 @@ simcov(beta) = (1/n) * sum_{i=1}^n  product_{j=1}^p  I{ y_ij ∈ [ŷ_ij ± q_j(
   - This results in a much faster algorithm with similar coverage properties.
  Fast Beta-Optim
 
-simcov(beta) = (1/n) * sum_{i=1}^n  I{ R_max(i) <= ceil((1 - beta) * n) }
+simcov(beta) = (1/n) * sum over i=1 to n of:
+               indicator{ R_max(i) <= ceil((1 - beta) * n) }
 
 
 
