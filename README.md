@@ -1,87 +1,111 @@
 # Algorithmique: Uncertainty Quantification in Multi-Output Regression
 
+This repository provides an R package implementing **conformal prediction techniques** to estimate **simultaneous prediction intervals** for multi-output regression tasks. The goal is to offer uncertainty-aware predictions with **provable guarantees**, even in high-dimensional settings.
 
-This repository provides an R package implementing conformal prediction techniques to estimate simultaneous prediction intervals for multi-output regression tasks. The goal is to offer uncertainty-aware predictions with provable guarantees, even in high-dimensional settings.
+## What's Included
 
-We include:
+- **Three uncertainty quantification methods**:
 
-Three uncertainty quantification methods (Beta-Optim, Max Rank, Fast Beta-Optim)
+  - Beta-Optim: a calibration-based method
+  - Fast Beta-Optim: a rank-based acceleration
+  - Max Rank: a simple, extremely fast baseline
 
-R + C++ implementations for comparison
+- **R + C++ implementations** for comparison
 
-A tutorial and benchmark results
+- **A tutorial** and benchmark results
+
+---
 
 ## Problem & Motivation
 
-In many fields such as health monitoring, energy prediction, or financial forecasting, we aim to predict not just a single value, but an entire curve (e.g., heart rate over 24 hours).
+In many fields such as **health monitoring**, **energy prediction**, or **financial forecasting**, we aim to predict not just a single value, but an entire curve (e.g., heart rate over 24 hours).
 
 Yet, it's crucial to also answer:
 
-🛡"How confident am I in these predictions?"
+> **"How confident am I in these predictions?"**
 
-We want to provide prediction intervals that cover all dimensions of $Y = (y_1, y_2, \dots, y_p)$ simultaneously, with a global probability $1 - \alpha$.
+We want to provide prediction intervals that cover all dimensions of \$Y = (y\_1, y\_2, \dots, y\_p)\$ **simultaneously**, with a global probability \$1 - \alpha\$.
 
-To solve this, we use Conformal Prediction, and in particular, we propose:
+To solve this, we use **Conformal Prediction**, and in particular, we propose:
 
-Beta-Optim: a calibration-based method
+- **Beta-Optim**: a calibration-based method
+- **Fast Beta-Optim**: a rank-based acceleration
+- **Max Rank**: a simple, extremely fast baseline
 
-Fast Beta-Optim: a rank-based acceleration
-
-Max Rank: a simple, extremely fast baseline
+---
 
 ## About Conformal Prediction
 
 Conformal prediction is a statistical framework that allows us to construct prediction intervals that are valid **regardless of the underlying model**. It only requires that the data be **exchangeable**, which is a weaker condition than being i.i.d.
 
-It provides the guarantee:  
-P(Y_test ∈ C(X_test)) ≥ 1 − α  
-for some significance level (α). This means that the true target will lie inside the predicted interval at least (1 − α) of the time.
+It provides the guarantee:
 
-![Conformal Prediction Illustration](figures/conformal_diagram.png)
+```text
+P(Y_test ∈ C(X_test)) ≥ 1 − α
+```
 
+This means that the true target will lie inside the predicted interval at least \$(1 − \alpha)\$ of the time.
 
+To better understand the conformal prediction procedure, here's the complete pipeline:
 
-**Coverage Guarantee**
+<p align="center">
+  <img src="conformal_prediction.png" width="750" />
+</p>
 
-**Exchangeability Assumption**: Assume that the calibration set \((X_i, Y_i)\) and the test point \((X_{\text{test}}, Y_{\text{test}})\) are exchangeable.
+### Coverage Guarantee
+
+- **Exchangeability Assumption**: Assume that the calibration set \$(X\_i, Y\_i)\$ and the test point \$(X\_{\text{test}}, Y\_{\text{test}})\$ are exchangeable.
 
 Then conformal prediction guarantees:
+<p align="center">
+  <img src="Coverage_Guarantee.png" width="750" />
+</p>
 
-  **1 − α ≤ P(Y_test ∈ C(X_test)) ≤ 1 − α + 1 / (n + 1)**
-
+```text
+1 − α ≤ P(Y_test ∈ C(X_test)) ≤ 1 − α + 1 / (n + 1)
+```
 This means we have a probabilistic bound on coverage even with finite calibration size.
 
+---
 
 ## Features
+
 - Generation of synthetic non-linear datasets with configurable output dimensions.
 - Training of regression models using **polynomial regression** or **gradient boosting** (`xgboost`).
 - Conformal prediction interval computation and coverage analysis.
 - Tools for empirical evaluation and visualization.
 - Fast C++ implementation for speed comparison with the R version.
 
+---
+
 ## Installation
+
 ### R Package Dependencies
+
 ```r
 install.packages(c("data.table", "xgboost", "caret", "R6", "Rcpp", "RcppArmadillo", "devtools", "roxygen2", "testthat"))
 ```
 
 ### Installing the Package from GitHub
-If you organize the code as an R package:
+
 ```r
-# devtools must be installed first
 install.packages("devtools")
 library(devtools)
 install_github("your_username/Algorithmique")
 ```
 
 ### Setting Up a C++ Compiler (Windows Users)
-Since Rcpp requires a C++ compiler, Windows users must install Rtools:
-- Download and install from: https://cran.r-project.org/bin/windows/Rtools/
 
-For general R updates and additional package downloads, visit: https://cran.r-project.org/
+Since Rcpp requires a C++ compiler, Windows users must install **Rtools**:
+
+- Download from: [https://cran.r-project.org/bin/windows/Rtools/](https://cran.r-project.org/bin/windows/Rtools/)
+
+---
 
 ## Tutorial
-A step-by-step tutorial is provided in `Tutorial.pdf`, which guides you through:
+
+A step-by-step tutorial is provided in `Tutorial.pdf`, guiding you through:
+
 1. Generating a synthetic dataset
 2. Splitting data into training, calibration, and test sets
 3. Training a model with `MLModel`
@@ -89,12 +113,11 @@ A step-by-step tutorial is provided in `Tutorial.pdf`, which guides you through:
 5. Visualizing prediction intervals
 
 ### Example Workflow
+
 ```r
-# Train a model
 model <- MLModel$new(X_train, y_train, method = "gradient_boosting")
 model$fit()
 
-# Initialize the uncertainty model
 uncertainty_model <- ModelUncertainties$new(
   model = model,
   X_calibration = X_calib,
@@ -103,12 +126,14 @@ uncertainty_model <- ModelUncertainties$new(
   Global_alpha = 0.9
 )
 
-# Fit the uncertainty method (compute Beta quantiles)
 uncertainty_model$fit()
 ```
 
+---
+
 ## Implemented Methods
-- **Beta-Optim:**
+
+### Beta-Optim
 Binary search over $\beta$ to find the smallest value such that the simultaneous coverage is at least $1 - \alpha$.
   - This method searches for the smallest width of prediction intervals that ensures a target **simultaneous coverage**.
   - It uses **dichotomic optimization** on a parameter \( \beta \), which controls the tolerance of the intervals.
@@ -121,54 +146,49 @@ $p$-dimensional quantiles for each $\beta$.
 ![Beta Optim Formula](/betaoptim.png)
 
 
-🔹 Max Rank
-- **Max Rank:**
-  - Ranks residuals for each dimension, and uses the **maximum rank per individual** as a summary statistic.
-  - Prediction intervals are constructed using a single quantile position (\( r_{\text{max}} \)) across dimensions.
+### Max Rank
 
-- **Max Rank Beta-Optim (Fast Beta-Optim):**
+- Rank residuals column-wise
+- For each row \$i\$, compute \$R\_{\max}^{(i)} = \max\_j \text{rank}\_{i,j}\$
+- Construct intervals using a quantile of these max ranks
+
+### Fast Beta-Optim
   - Combines the **rank-based speed** of Max Rank with the **coverage optimization** of Beta-Optim.
   - Instead of optimizing each dimension’s quantile separately, we optimize directly on the rank threshold.
   - This results in a much faster algorithm with similar coverage properties.
  Fast Beta-Optim
-
-simcov(beta) = (1/n) * sum over i=1 to n of:
-               indicator{ R_max(i) <= ceil((1 - beta) * n) }
-
-### Beta-Optim: Simultaneous Coverage
-
-
-
-This formula defines the coverage function that is minimized to find the optimal β.
-
+![Beta Optim Formula](/fastbetaoptim.png)
+---
 
 ## Results
-- All three methods were tested on simulated datasets representing multivariate time series (e.g., biological or cardiac signals).
-- Empirical evaluations show that Max Rank Beta-Optim provides the best trade-off between computational efficiency and predictive reliability.
 
-## Perspectives
-- Future work could involve extending the method to a vectorized beta, learning one \( \beta_j \) per output dimension.
-- Integration with more complex deep learning models.
-- Real-world applications on medical, industrial, or energy datasets.
-
-## Project Context
-This package was developed as part of a Master's project at Université Paris-Saclay, involving:
-- Theoretical and practical study of **simultaneous conformal prediction**
-- Implementation of three methods:
-  - Beta-Optim (with dichotomic search)
-  - Max Rank (rank-based thresholding)
-  - Max Rank Beta-Optim (efficient coverage tuning)
-- Evaluation on simulated multi-frequency data
-
-Refer to `Rapport_Projet_Algorithmique.pdf` and `Algo_report_Aymane_Jaad_FatimaZ.pdf` for the complete methodology and results.
-
-## License
-MIT License
-
-## Authors
-- Jaad Belhouari
-- Fatima-Zahra Hannou
-- Aymane Mimoun
+- The three methods were tested on simulated multivariate signals
+- Max Rank Beta-Optim offers the best trade-off between **speed** and **coverage accuracy**
 
 ---
 
+## Perspectives
+
+- Extension to **dimension-wise beta optimization** (\$\beta\_j\$)
+- Advantages:
+  - Adjust the width of prediction intervals to the difficulty of each output
+dimension.
+  - Gain flexibility and potentially tighter intervals for easier-to-predict dimensions.
+- Challenges:
+  - How to ensure simultaneous coverage across all dimensions?
+  - Requires new optimization strategies or regularization on β.
+---
+
+## Project Context
+
+This work was developed as part of the **Algorithmique Project** at Université Paris-Saclay (M2 Data Science), under the supervision of Prof. Stéphanie Allassonnière.
+
+Refer to `Report_Project.pdf` for details.
+
+---
+
+## Authors
+
+- Jaad Belhouari
+- Fatima-Zahra Hannou
+- Aymane Mimoun
