@@ -113,13 +113,13 @@ Binary search over $\beta$ to find the smallest value such that the simultaneous
   - This method searches for the smallest width of prediction intervals that ensures a target **simultaneous coverage**.
   - It uses **dichotomic optimization** on a parameter \( \beta \), which controls the tolerance of the intervals.
   - For each candidate \( \beta \), quantiles \( q_j(1-\beta) \) are computed per dimension, and coverage is evaluated.
+    ![Demo](betaoptim_mechanism.gif)
+
 $p$-dimensional quantiles for each $\beta$.
   - The optimal \( \beta^* \) minimizes the deviation from the desired coverage \( 1 - \alpha \).
 
+![Beta Optim Formula](/betaoptim.png)
 
-```
-simcov(β) = (1/n) * ∑_{i=1}^n ∏_{j=1}^p 𝟙{ y_{i,j} ∈ [ŷ_{i,j} ± q_j(1 - β)] }
-```
 
 🔹 Max Rank
 - **Max Rank:**
@@ -137,7 +137,7 @@ simcov(beta) = (1/n) * sum over i=1 to n of:
 
 ### Beta-Optim: Simultaneous Coverage
 
-![Beta Optim Formula](/betaoptim.png)
+
 
 This formula defines the coverage function that is minimized to find the optimal β.
 
