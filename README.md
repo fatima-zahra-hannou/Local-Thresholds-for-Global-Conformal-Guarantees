@@ -41,15 +41,16 @@ for some significance level (α). This means that the true target will lie insid
 
 
 
-### Coverage Guarantee
-**Exchangeability Assumption:** Assume that the calibration set \((X_i, Y_i)\) and the test point \((X_{\text{test}}, Y_{\text{test}})\) are exchangeable.
+**Coverage Guarantee**
+
+**Exchangeability Assumption**: Assume that the calibration set \((X_i, Y_i)\) and the test point \((X_{\text{test}}, Y_{\text{test}})\) are exchangeable.
 
 Then conformal prediction guarantees:
-\[
-1 - \alpha \leq \mathbb{P}(Y_{\text{test}} \in \mathcal{C}(X_{\text{test}})) \leq 1 - \alpha + \frac{1}{n + 1}
-\]
 
-This means we have a probabilistic bound on coverage even with finite calibration size \(n\).
+  **1 − α ≤ P(Y_test ∈ C(X_test)) ≤ 1 − α + 1 / (n + 1)**
+
+This means we have a probabilistic bound on coverage even with finite calibration size.
+
 
 ## Features
 - Generation of synthetic non-linear datasets with configurable output dimensions.
@@ -115,6 +116,7 @@ Binary search over $\beta$ to find the smallest value such that the simultaneous
 $p$-dimensional quantiles for each $\beta$.
   - The optimal \( \beta^* \) minimizes the deviation from the desired coverage \( 1 - \alpha \).
 
+simcov(beta) = (1/n) * sum_{i=1}^n  product_{j=1}^p  I{ y_ij ∈ [ŷ_ij ± q_j(1 - beta)] }
 
 
 🔹 Max Rank
@@ -128,9 +130,7 @@ $p$-dimensional quantiles for each $\beta$.
   - This results in a much faster algorithm with similar coverage properties.
  Fast Beta-Optim
 
-Uses the same idea as Max Rank, but optimizes the threshold using binary search on $\beta$.
-
-!!!!!!!!!!!!!!!!!!!!!!!!!
+simcov(beta) = (1/n) * sum_{i=1}^n  I{ R_max(i) <= ceil((1 - beta) * n) }
 
 
 
